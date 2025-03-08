@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "gelin-gamine",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
