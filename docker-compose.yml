@@ -1,0 +1,12 @@
+services:
+  database:
+    container_name: "database-gelin-game"
+    image: postgres:13.4
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=pqgotest
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=pqgotest
+    volumes:
+      - ./db-data:/var/lib/postgresql/data

@@ -2,8 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Rob9nn/gelin-game/internal/route"
 )
@@ -13,9 +15,24 @@ type errorResponse struct {
 }
 
 func Run() {
+	writeHeader()
 	log.Println("Listening on :8080")
 	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func writeHeader() {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Panicln(err)
+	}
+	fileName := "/internal/server/server-header.txt"
+	data, err := os.ReadFile(dir + fileName)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	fmt.Printf("%s v.0.0.1\n", data)
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
