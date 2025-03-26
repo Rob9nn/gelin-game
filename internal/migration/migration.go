@@ -1,7 +1,9 @@
 package migration
 
 import (
+	"database/sql"
 	"log"
+	"os"
 
 	"github.com/Rob9nn/gelin-game/internal/db"
 )
@@ -13,8 +15,28 @@ func Migrate() {
 		log.Panic(err)
 	}
 
+	createMigrationTableIfNotExists(conn)
+
+	// let this here to be able to configure it
+	dirPath :=
+		loadMigration(dirPath)
+}
+
+func loadMigration(dirPath string) {
+	// go through dir and execute files.
+	entries, err := os.ReadDir(dirPath)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	for _, entry := range entries {
+		log.Printf("[debug] " + entry.Name())
+	}
+}
+
+func createMigrationTableIfNotExists(conn *sql.DB) {
 	var count int8
-	err = conn.QueryRow("select count(1) from pg_catalog.pg_tables where tablename = 'migration_history'").Scan(&count)
+	err := conn.QueryRow("select count(1) from pg_catalog.pg_tables where tablename = 'migration_history'").Scan(&count)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -35,6 +57,4 @@ func Migrate() {
 			log.Panic(err)
 		}
 	}
-
-	// check dir where migrate are and load
 }

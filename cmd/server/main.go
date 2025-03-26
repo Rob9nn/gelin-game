@@ -8,7 +8,7 @@ import (
 	"github.com/Rob9nn/gelin-game/internal/server"
 )
 
-func main() {
+func Main() {
 	err := db.NewConnectionPool(10)
 	if err != nil {
 		log.Panic(err)
