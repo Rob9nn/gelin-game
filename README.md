@@ -4,7 +4,10 @@ A kind of Olympic games app. Multiple teams confront each other during a day on 
 
 ## Getting started
 
-go run cmd/gelinGame.go
+SERVER
+- go run cmd/server/main.go
+CLI
+- go run cmd/cli/main.go
 
 # Road map
 
