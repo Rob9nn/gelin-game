@@ -3,9 +3,9 @@ package migration
 import (
 	"database/sql"
 	"log"
-	"os"
 
 	"github.com/Rob9nn/gelin-game/internal/db"
+	"github.com/Rob9nn/gelin-game/resources"
 )
 
 func Migrate() {
@@ -17,20 +17,21 @@ func Migrate() {
 
 	createMigrationTableIfNotExists(conn)
 
-	// let this here to be able to configure it
-	dirPath :=
-		loadMigration(dirPath)
+	loadMigration()
 }
 
-func loadMigration(dirPath string) {
-	// go through dir and execute files.
-	entries, err := os.ReadDir(dirPath)
+func loadMigration() {
+	entries, err := resources.GetSqlFiles()
 	if err != nil {
 		log.Panic(err)
 	}
 
 	for _, entry := range entries {
-		log.Printf("[debug] " + entry.Name())
+		if entry.Name()[0] == 'V' {
+			log.Println("Versioned file")
+		} else if entry.Name()[0] == 'R' {
+			log.Println("Repeatable file")
+		}
 	}
 }
 
