@@ -14,6 +14,16 @@ type errorResponse struct {
 	message string
 }
 
+type Route struct {
+	Method_type string
+	Path        string
+	Handler     http.HandlerFunc
+}
+
+type Controller interface {
+	Routes() []Route
+}
+
 func Run() {
 	writeHeader()
 	log.Println("Listening on :8080")
