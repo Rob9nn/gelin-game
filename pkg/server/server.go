@@ -2,66 +2,80 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/Rob9nn/gelin-game/internal/route"
+	"github.com/Rob9nn/gelin-game/internal/player"
+	"github.com/Rob9nn/gelin-game/pkg/controller"
 )
 
 type errorResponse struct {
 	message string
 }
 
-type Route struct {
-	Method_type string
-	Path        string
-	Handler     http.HandlerFunc
+type server struct {
+	get    map[string]func(w http.ResponseWriter, r *http.Request)
+	update map[string]func(w http.ResponseWriter, r *http.Request)
+	delete map[string]func(w http.ResponseWriter, r *http.Request)
+	post   map[string]func(w http.ResponseWriter, r *http.Request)
 }
 
-type Controller interface {
-	Routes() []Route
+type Server interface {
+	loadRoute(c controller.Controller)
 }
 
+var s = &server{
+	get:    make(map[string]func(w http.ResponseWriter, r *http.Request)),
+	update: make(map[string]func(w http.ResponseWriter, r *http.Request)),
+	delete: make(map[string]func(w http.ResponseWriter, r *http.Request)),
+	post:   make(map[string]func(w http.ResponseWriter, r *http.Request)),
+}
+
+// received set of controller ?
 func Run() {
-	writeHeader()
 	log.Println("Listening on :8080")
+
+	// load routes
+	pc := player.PlayerController{}
+	s.loadRoutes(pc)
+
+	// set global function that handle everything
 	http.HandleFunc("/", handler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func writeHeader() {
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Panicln(err)
+// add routes to correct method for each controller
+func (s *server) loadRoutes(c controller.Controller) {
+	routes := c.Routes()
+	for _, r := range routes {
+		log.Printf("Load [%s] %s", r.Method_type, r.Path)
+		s.getMethodMap(r.Method_type)[r.Path] = r.Handler
 	}
-	fileName := "/internal/server/server-header.txt"
-	data, err := os.ReadFile(dir + fileName)
-	if err != nil {
-		log.Fatal(err.Error())
+}
+
+func (s *server) getMethodMap(method string) map[string]func(w http.ResponseWriter, r *http.Request) {
+	if method == http.MethodPost {
+		return s.post
+	} else if method == http.MethodDelete {
+		return s.delete
+	} else if method == http.MethodPut {
+		return s.update
 	}
 
-	fmt.Printf("%s v.0.0.1\n", data)
+	return s.get
 }
 
 func handler(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-Type", "application/json")
-	if req.Method == "GET" {
-		f, ok := route.GET[req.RequestURI]
-		if !ok {
-			routeNotFound(resp, req)
-			return
-		}
-		f()
-	} else if req.Method == "POST" {
-		f, ok := route.POST[req.RequestURI]
-		if !ok {
-			routeNotFound(resp, req)
-			return
-		}
-		f(req.Body)
+	log.Printf("handling : [%s] %s", req.Method, req.RequestURI)
+	handler, found := s.getMethodMap(req.Method)[req.RequestURI]
+	if !found {
+		routeNotFound(resp, req)
+		return
 	}
+
+	// call handler
+	handler(resp, req)
 }
 
 func routeNotFound(w http.ResponseWriter, r *http.Request) {

@@ -7,7 +7,7 @@ import (
 	"log"
 	"strings"
 
-	"github.com/Rob9nn/gelin-game/internal/db"
+	"github.com/Rob9nn/gelin-game/pkg/db"
 	"github.com/Rob9nn/gelin-game/resources"
 )
 

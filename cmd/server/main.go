@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 
-	"github.com/Rob9nn/gelin-game/internal/db"
-	"github.com/Rob9nn/gelin-game/internal/migration"
-	"github.com/Rob9nn/gelin-game/internal/server"
+	"github.com/Rob9nn/gelin-game/pkg/db"
+	"github.com/Rob9nn/gelin-game/pkg/migration"
+	"github.com/Rob9nn/gelin-game/pkg/server"
 )
 
 func main() {
